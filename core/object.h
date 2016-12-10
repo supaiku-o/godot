@@ -693,6 +693,7 @@ public:
 	typedef void (*DebugFunc)(Object *p_obj);
 
 	static Object *get_instance(uint32_t p_instance_ID);
+    static void get_instance_ids(List<uint32_t> *list);
 	static void debug_objects(DebugFunc p_func);
 	static int get_object_count();
 

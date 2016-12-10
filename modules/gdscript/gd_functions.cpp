@@ -107,6 +107,7 @@ const char *GDFunctions::get_func_name(Function p_func) {
 		"Color8",
 		"print_stack",
 		"instance_from_id",
+        "dump_instances"
 	};
 
 	return _names[p_func];
@@ -1090,6 +1091,59 @@ void GDFunctions::call(Function p_func,const Variant **p_args,int p_arg_count,Va
 
 			ERR_FAIL();
 		} break;
+        case DUMP_INSTANCES: {
+            uint32_t top = 100;
+
+            if (p_arg_count == 1) {
+
+                if (p_args[0]->get_type()!=Variant::INT && p_args[0]->get_type()!=Variant::REAL) {
+                    r_error.error=Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;
+                    r_error.argument=0;
+                    r_error.expected=Variant::INT;
+                    r_ret=Variant();
+                    break;
+                }
+
+                top = Math::abs(*p_args[0]);
+
+            } else {
+                VALIDATE_ARG_COUNT(0);
+            }
+
+            List<uint32_t> keys;
+            ObjectDB::get_instance_ids(&keys);
+            keys.sort();
+
+            print_line("----------------------------------------------------------");
+            print_line("Dumping GDScript instances:");
+            print_line("Limit top: " + itos(top));
+            print_line("----------------------------------------------------------");
+
+            for (int i = keys.size() - 1; top > 0 && i >= 0; i--) {
+                uint32_t key = keys[i];
+                Object* obj = ObjectDB::get_instance(key);
+                ScriptInstance *si = obj->get_script_instance();
+                if (si) {
+                    GDInstance *gi = dynamic_cast<GDInstance*>(si);
+                    if (gi) {
+                        GDScript* script = gi->get_script()->cast_to<GDScript>();
+                        if (script) {
+                            if (script->name != "") {
+                                print_line("[" + itos(obj->get_instance_ID()) + "]\t" + script->name);
+                            } else if (script->get_path() != "") {
+                                print_line("[" + itos(obj->get_instance_ID()) + "]\t" + script->path);
+                            } else {
+                                print_line("[" + itos(obj->get_instance_ID()) + "]\tUNKNOWN");
+                            }
+
+                            top--;
+                        }
+                    }
+                }
+            }
+            print_line("----------------------------------------------------------");
+
+        } break;
 
 	}
 
@@ -1539,6 +1593,12 @@ MethodInfo GDFunctions::get_info(Function p_func) {
 
 			ERR_FAIL_V(MethodInfo());
 		} break;
+
+        case DUMP_INSTANCES: {
+            MethodInfo mi("dump_instances");
+            mi.return_val.type=Variant::NIL;
+            return mi;
+        } break;
 
 	}
 #endif

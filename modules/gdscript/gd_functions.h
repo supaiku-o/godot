@@ -101,7 +101,8 @@ public:
 		COLOR8,
 		PRINT_STACK,
 		INSTANCE_FROM_ID,
-		FUNC_MAX
+        DUMP_INSTANCES,
+        FUNC_MAX
 
 	};
 

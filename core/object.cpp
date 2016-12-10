@@ -1968,6 +1968,11 @@ Object *ObjectDB::get_instance(uint32_t p_instance_ID) {
 	return *obj;
 }
 
+void ObjectDB::get_instance_ids(List<uint32_t> *list) {
+    GLOBAL_LOCK_FUNCTION;
+    instances.get_key_list(list);
+}
+
 void ObjectDB::debug_objects(DebugFunc p_func) {
 
 	GLOBAL_LOCK_FUNCTION;
